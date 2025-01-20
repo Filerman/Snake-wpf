@@ -1,0 +1,167 @@
+﻿<Window x:Class="Snake.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Snake"
+        mc:Ignorable="d"
+        Title="Snake" Height="500" Width="800"
+        MinWidth="300" MinHeight="300"
+        Background="{StaticResource BackgroundColor}"
+        Foreground="{StaticResource TextColor}"
+        FontFamily="{StaticResource MainFont}"
+        WindowStartupLocation="CenterOwner"
+        Icon="Assets/icon.ico"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        KeyDown="Window_KeyDown">
+
+    <Window.Resources>
+        <!-- ComboBox Style -->
+        <Style TargetType="ComboBox">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Padding" Value="5" />
+            <Setter Property="Margin" Value="10,0,20,0" />
+            <!-- Użycie zasobów kolorów, by zachować spójność z główną kolorystyką -->
+            <Setter Property="Background" Value="{StaticResource GridBackgroundColor}" />
+            <!-- Ustawienie ciemnego koloru tekstu -->
+            <Setter Property="Foreground" Value="#000000" />
+            <Setter Property="BorderBrush" Value="{StaticResource GridLineColor}" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="Width" Value="150" />
+            <Setter Property="Height" Value="30" />
+        </Style>
+
+        <!-- ComboBoxItem Style -->
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Padding" Value="5,2" />
+            <Setter Property="Background" Value="Transparent" />
+            <!-- Ustawienie ciemnego koloru czcionki -->
+            <Setter Property="Foreground" Value="#000000" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <!-- Gdy element jest zaznaczony -->
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#526B54" />
+                                <Setter Property="Foreground" Value="#000000" />
+                            </Trigger>
+                            <!-- Gdy kursor jest na elemencie -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#617B64" />
+                                <Setter Property="Foreground" Value="#000000" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Viewbox>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- ScoreText -->
+            <TextBlock x:Name="ScoreText"
+                       Grid.Row="0" Grid.Column="0"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       Text="SCORE 0"
+                       FontSize="22"
+                       Margin="10" />
+
+            <!-- TimerText -->
+            <TextBlock x:Name="TimerText"
+                       Grid.Row="0" Grid.Column="1"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       Text="TIME: 0s"
+                       FontSize="22"
+                       Margin="20,0,0,0" />
+
+            <!-- ComboBox for Snake Color Selection -->
+            <ComboBox x:Name="ColorSelector"
+                      Grid.Row="0" Grid.Column="2"
+                      HorizontalAlignment="Right"
+                      VerticalAlignment="Center"
+                      Width="150"
+                      Height="30"
+                      Margin="10,0,20,0"
+                      Panel.ZIndex="10"
+                      IsTabStop="False"
+                      Focusable="False"
+                      SelectionChanged="ColorSelector_SelectionChanged">
+                <ComboBoxItem Content="Green" IsSelected="True"/>
+                <ComboBoxItem Content="Blue"/>
+                <ComboBoxItem Content="Red"/>
+                <ComboBoxItem Content="Yellow"/>
+            </ComboBox>
+
+            <!-- ComboBox for Difficulty Selection -->
+            <ComboBox x:Name="DifficultySelector"
+                      Grid.Row="0" Grid.Column="3"
+                      HorizontalAlignment="Right"
+                      VerticalAlignment="Center"
+                      Width="150"
+                      Height="30"
+                      Margin="10,0,20,0"
+                      Panel.ZIndex="10"
+                      IsTabStop="False"
+                      Focusable="False"
+                      SelectionChanged="DifficultySelector_SelectionChanged">
+                <ComboBoxItem Content="Easy" IsSelected="True"/>
+                <ComboBoxItem Content="Medium"/>
+                <ComboBoxItem Content="Hard"/>
+                <ComboBoxItem Content="Extreme"/>
+            </ComboBox>
+
+            <!-- Game Grid -->
+            <Border x:Name="GridBorder"
+                    Grid.Row="1" Grid.ColumnSpan="4"
+                    BorderBrush="{StaticResource GridLineColor}"
+                    BorderThickness="1.5"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    RenderOptions.EdgeMode="Aliased"
+                    Margin="20,0,20,20">
+                <UniformGrid x:Name="GameGrid"
+                             Width="400"
+                             Height="400"
+                             Background="{StaticResource GridBackgroundColor}"
+                             SnapsToDevicePixels="True"
+                             RenderOptions.BitmapScalingMode="HighQuality">
+                </UniformGrid>
+            </Border>
+
+            <!-- Overlay -->
+            <Border x:Name="Overlay"
+                    Grid.Row="1" Grid.ColumnSpan="4"
+                    Background="{StaticResource OverlayColor}"
+                    Width="{Binding Path=ActualWidth, ElementName=GridBorder}"
+                    Height="{Binding Path=ActualHeight, ElementName=GridBorder}"
+                    Margin="{Binding Path=Margin, ElementName=GridBorder}"
+                    RenderOptions.EdgeMode="Aliased">
+                <TextBlock x:Name="OverlayText"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Text="Press any key to start"
+                           FontSize="26"
+                           TextWrapping="Wrap"/>
+            </Border>
+        </Grid>
+    </Viewbox>
+</Window>
